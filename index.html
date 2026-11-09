@@ -1,352 +1,696 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-theme="dark" data-accent="blue">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Proyector de Evaluación</title>
-    <!-- Tailwind CSS for rapid styling -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Evaluación Pro</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
     <style>
-        /* Custom styles for specific projector needs */
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@700&display=swap');
+        :root {
+            /* MODO CLARO */
+            --bg-light: #F4F6FB;
+            --surface-light: #FFFFFF;
+            --surface-2-light: #EEF1F8;
+            --border-light: #E0E5F0;
+            --text-light: #151A2D;
+            --text-muted-light: #5B6480;
+            
+            /* MODO OSCURO */
+            --bg-dark: #0B1020;
+            --surface-dark: #151B2E;
+            --surface-2-dark: #1E2640;
+            --border-dark: #2A3454;
+            --text-dark: #F2F4FA;
+            --text-muted-dark: #A3ACC8;
+
+            /* ESTADOS */
+            --warning: #F59F00;
+            --orange: #F76707;
+            --danger: #FA5252;
+            
+            /* VARIABLES ACTIVAS */
+            --bg: var(--bg-dark);
+            --surface: var(--surface-dark);
+            --surface-2: var(--surface-2-dark);
+            --border: var(--border-dark);
+            --text: var(--text-dark);
+            --text-muted: var(--text-muted-dark);
+            --accent: #748FFC;
+            --accent-contrast: #FFFFFF;
+            --ring-bg: var(--border-dark);
+            
+            --radius-md: 12px;
+            --radius-lg: 24px;
+            --radius-full: 9999px;
+            --shadow-sm: 0 4px 12px rgba(0,0,0,0.05);
+            --shadow-lg: 0 12px 32px rgba(0,0,0,0.1);
+            --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        [data-theme="light"] {
+            --bg: var(--bg-light);
+            --surface: var(--surface-light);
+            --surface-2: var(--surface-2-light);
+            --border: var(--border-light);
+            --text: var(--text-light);
+            --text-muted: var(--text-muted-light);
+            --ring-bg: var(--surface-2-light);
+            --shadow-sm: 0 4px 12px rgba(0,0,0,0.03);
+            --shadow-lg: 0 12px 32px rgba(0,0,0,0.08);
+        }
+
+        [data-accent="blue"] { --accent: #3B5BDB; }
+        [data-theme="dark"][data-accent="blue"] { --accent: #748FFC; }
+        [data-accent="violet"] { --accent: #7048E8; }
+        [data-theme="dark"][data-accent="violet"] { --accent: #9775FA; }
+        [data-accent="turquoise"] { --accent: #0CA678; --accent-contrast: #0B1020; }
+        [data-theme="dark"][data-accent="turquoise"] { --accent: #38D9A9; --accent-contrast: #0B1020; }
+        [data-accent="orange"] { --accent: #F76707; }
+        [data-theme="dark"][data-accent="orange"] { --accent: #FF922B; --accent-contrast: #0B1020; }
+        [data-accent="pink"] { --accent: #D6336C; }
+        [data-theme="dark"][data-accent="pink"] { --accent: #F783AC; --accent-contrast: #0B1020;}
+        [data-accent="cyan"] { --accent: #1098AD; }
+        [data-theme="dark"][data-accent="cyan"] { --accent: #3BC9DB; --accent-contrast: #0B1020; }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f8fafc;
+            font-family: 'Outfit', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            transition: background-color 0.3s, color 0.3s;
+            min-height: 100vh;
+            overflow-x: hidden;
         }
 
-        #display-view {
-            font-family: 'Inter', sans-serif;
-            /* Dark sleek background for projector to avoid blinding light */
-            background-color: #0f172a; 
-            color: #f8fafc;
+        svg { stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+        .hidden { display: none !important; }
+        .flex { display: flex; }
+        .items-center { align-items: center; }
+        .justify-between { justify-content: space-between; }
+        .gap-4 { gap: 1rem; }
+        .text-muted { color: var(--text-muted); }
+        
+        .top-bar { padding: 1.5rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+        
+        .brand { display: flex; align-items: center; gap: 1rem; font-weight: 700; font-size: 1.25rem; }
+        .brand-icon {
+            background-color: var(--accent); color: var(--accent-contrast);
+            width: 40px; height: 40px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center; transition: var(--transition);
         }
 
-        .timer-font {
-            /* Monospace font for the timer so numbers don't jump around */
+        .global-controls { display: flex; gap: 1rem; align-items: center; }
+        .icon-btn {
+            background: var(--surface-2); border: 1px solid var(--border); color: var(--text);
+            width: 40px; height: 40px; border-radius: 50%; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; transition: var(--transition);
+        }
+        .icon-btn:hover { background: var(--border); transform: scale(1.05); }
+
+        .color-picker { display: flex; background: var(--surface-2); padding: 0.25rem; border-radius: var(--radius-full); border: 1px solid var(--border); }
+        .color-swatch {
+            width: 28px; height: 28px; border-radius: 50%; border: none; cursor: pointer;
+            margin: 0 0.125rem; transition: var(--transition);
+        }
+        .color-swatch.active { transform: scale(1.15); box-shadow: 0 0 0 2px var(--surface-2), 0 0 0 4px var(--accent); }
+
+        .config-layout {
+            display: grid; grid-template-columns: 1fr; gap: 2rem;
+            padding: 0 2rem 2rem 2rem; max-width: 1400px; margin: 0 auto;
+        }
+        @media (min-width: 1024px) { .config-layout { grid-template-columns: 1fr 1fr; } }
+
+        .panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 2rem; box-shadow: var(--shadow-sm); }
+        .panel h2 { font-size: 1.5rem; margin-bottom: 0.5rem; }
+        .panel p.subtitle { color: var(--text-muted); margin-bottom: 2rem; font-size: 0.95rem; }
+
+        .form-group { margin-bottom: 1.5rem; }
+        .form-group label { display: block; font-weight: 600; margin-bottom: 0.5rem; font-size: 0.95rem; }
+
+        input[type="text"], input[type="number"], input[type="time"], textarea {
+            width: 100%; background: var(--surface-2); border: 2px solid var(--border); color: var(--text);
+            padding: 0.75rem 1rem; border-radius: var(--radius-md); font-family: inherit; font-size: 1rem;
+            transition: var(--transition); outline: none;
+        }
+        input:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(116, 143, 252, 0.2); }
+        textarea { resize: vertical; min-height: 120px; line-height: 1.5; }
+
+        .segmented-control {
+            display: flex; background: var(--surface-2); padding: 0.35rem; border-radius: var(--radius-full); margin-bottom: 1rem;
+        }
+        .segment-btn {
+            flex: 1; background: transparent; border: none; color: var(--text-muted);
+            padding: 0.5rem 1rem; border-radius: var(--radius-full); font-weight: 600; cursor: pointer;
+            transition: var(--transition); font-size: 0.95rem;
+        }
+        .segment-btn.active { background: var(--surface); color: var(--text); box-shadow: var(--shadow-sm); }
+
+        .chips { display: flex; gap: 0.5rem; margin-top: 0.75rem; flex-wrap: wrap; }
+        .chip {
+            background: var(--surface-2); border: 1px solid var(--border); color: var(--text);
+            padding: 0.25rem 0.75rem; border-radius: var(--radius-full); font-size: 0.85rem; cursor: pointer; transition: var(--transition);
+        }
+        .chip:hover { background: var(--accent); color: var(--accent-contrast); border-color: var(--accent); }
+
+        .btn-primary {
+            width: 100%; background: var(--accent); color: var(--accent-contrast); border: none;
+            padding: 1rem; border-radius: var(--radius-md); font-size: 1.1rem; font-weight: 600;
+            display: flex; justify-content: center; align-items: center; gap: 0.5rem; cursor: pointer;
+            transition: var(--transition); box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .btn-primary:hover { transform: translateY(-2px); filter: brightness(1.1); box-shadow: 0 6px 20px rgba(0,0,0,0.15); }
+        
+        .btn-secondary {
+            background: transparent; color: var(--text); border: 2px solid var(--border);
+            padding: 0.5rem 1rem; border-radius: var(--radius-full); font-weight: 600;
+            display: flex; align-items: center; gap: 0.5rem; cursor: pointer; transition: var(--transition);
+        }
+        .btn-secondary:hover { background: var(--surface-2); border-color: var(--text-muted); }
+
+        .preview-wrapper {
+            background: var(--surface-2); border-radius: var(--radius-lg); padding: 1rem;
+            display: flex; flex-direction: column; border: 1px solid var(--border);
+        }
+        .preview-header { font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 1px; }
+        .preview-content {
+            background: var(--bg); border-radius: var(--radius-md); flex: 1; padding: 2rem;
+            border: 1px solid var(--border); display: flex; flex-direction: column;
+            overflow: hidden; pointer-events: none; zoom: 0.7;
+        }
+
+        #projection-view {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg); z-index: 100; display: flex; flex-direction: column;
+        }
+
+        .proj-header { padding: 2rem 3rem; display: flex; justify-content: space-between; align-items: center; }
+        .proj-title { font-size: 2rem; font-weight: 700; }
+        .proj-clock { font-size: 1.5rem; font-weight: 500; font-family: 'JetBrains Mono', monospace; color: var(--text-muted); }
+
+        .proj-main {
+            flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 4rem;
+            padding: 0 4rem 4rem 4rem; align-items: center;
+        }
+
+        /* AJUSTES CRONÓMETRO CIRCULAR */
+        .timer-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px; /* Reducido levemente para ajuste */
+            aspect-ratio: 1;
+            margin: 0 auto;
+        }
+        .timer-svg {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            transform: rotate(-90deg);
+        }
+        .timer-track { stroke: var(--ring-bg); stroke-width: 5; } /* Trazo más fino */
+        .timer-progress {
+            stroke: var(--accent); stroke-width: 5; /* Trazo más fino */
+            stroke-dasharray: 283; stroke-dashoffset: 0;
+            transition: stroke-dashoffset 1s linear, stroke 0.5s ease;
+        }
+        
+        /* Contenedor absoluto para evitar que empuje el SVG */
+        .timer-text-container {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            padding: 2rem;
+            z-index: 2;
+        }
+        .timer-time {
             font-family: 'JetBrains Mono', monospace;
             font-variant-numeric: tabular-nums;
+            font-size: clamp(3rem, 9vw, 6.5rem); /* Dinámico */
+            font-weight: 700;
+            line-height: 1;
+            color: var(--text);
+            transition: color 0.5s ease, font-size 0.3s ease;
+            white-space: nowrap;
+        }
+        .timer-message {
+            font-size: clamp(1rem, 2.5vw, 1.5rem);
+            font-weight: 500; color: var(--text-muted);
+            margin-top: 1rem; transition: color 0.5s ease;
+            text-align: center;
         }
 
-        .instruction-list {
-            list-style-type: decimal;
-            padding-left: 1.5rem;
+        .proj-instructions {
+            background: var(--surface); padding: 3rem; border-radius: var(--radius-lg);
+            border: 1px solid var(--border); box-shadow: var(--shadow-lg);
+        }
+        .proj-instructions h3 { font-size: 1.8rem; margin-bottom: 2rem; display: flex; align-items: center; gap: 1rem; }
+        .instruction-list { list-style: none; display: flex; flex-direction: column; gap: 1.5rem; }
+        .instruction-item { display: flex; gap: 1.5rem; align-items: flex-start; font-size: 1.4rem; line-height: 1.5; color: var(--text); }
+        .instruction-number {
+            background: var(--accent); color: var(--accent-contrast);
+            width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 1.2rem; flex-shrink: 0; margin-top: 0.2rem;
         }
 
-        .instruction-list li {
-            margin-bottom: 0.75rem;
+        .state-warning .timer-progress { stroke: var(--warning); }
+        .state-warning .timer-time, .state-warning .timer-message { color: var(--warning); }
+        .state-orange .timer-progress { stroke: var(--orange); }
+        .state-orange .timer-time, .state-orange .timer-message { color: var(--orange); }
+        .state-danger .timer-progress { stroke: var(--danger); }
+        .state-danger .timer-time, .state-danger .timer-message { color: var(--danger); }
+        .pulse { animation: pulse 2s infinite; }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.02); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
         }
 
-        /* Smooth transition for progress bar */
-        #progress-bar {
-            transition: width 1s linear, background-color 0.5s ease;
+        .screen-end {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg); z-index: 10; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.5s ease;
         }
+        .screen-end.active { opacity: 1; pointer-events: all; }
+        .screen-end h1 { font-size: 5rem; color: var(--danger); margin-bottom: 1rem; text-align: center;}
+        .screen-end p { font-size: 2rem; color: var(--text-muted); }
+
+        @media (max-width: 1200px) {
+            .proj-main { grid-template-columns: 1fr; gap: 2rem; padding: 2rem; }
+            .timer-container { max-width: 400px; }
+            .proj-instructions { padding: 2rem; }
+            .instruction-item { font-size: 1.2rem; }
+        }
+        
+        #confirm-modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); display: flex; justify-content: center; align-items: center;
+            z-index: 200; opacity: 0; pointer-events: none; transition: var(--transition);
+        }
+        #confirm-modal.active { opacity: 1; pointer-events: all; }
+        .modal-content {
+            background: var(--surface); padding: 2rem; border-radius: var(--radius-lg);
+            border: 1px solid var(--border); box-shadow: var(--shadow-lg); max-width: 400px; text-align: center;
+        }
+        .modal-content h3 { margin-bottom: 1rem; font-size: 1.5rem; }
+        .modal-content p { color: var(--text-muted); margin-bottom: 2rem; }
+        .modal-actions { display: flex; gap: 1rem; justify-content: center; }
+        .btn-danger { background: var(--danger); color: white; border: none; padding: 0.75rem 1.5rem; border-radius: var(--radius-full); font-weight: 600; cursor: pointer; }
     </style>
 </head>
-<body class="h-screen w-screen overflow-hidden text-slate-800">
+<body>
 
-    <!-- ================= CONFIGURATION VIEW ================= -->
-    <div id="config-view" class="h-full w-full flex items-center justify-center p-6 bg-slate-100 overflow-y-auto">
-        <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-2xl">
-            <h1 class="text-3xl font-bold text-slate-800 mb-6 text-center border-b pb-4">⚙️ Configurar Evaluación</h1>
-            
-            <form id="config-form" class="space-y-6">
-                <!-- Exam Title -->
-                <div>
-                    <label for="exam-title" class="block text-sm font-semibold text-slate-700 mb-1">Título de la Evaluación</label>
-                    <input type="text" id="exam-title" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" value="Evaluación de Matemática" required>
+    <div id="config-view">
+        <header class="top-bar">
+            <div class="brand">
+                <div class="brand-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                </div>
+                Evaluación Pro
+            </div>
+            <div class="global-controls">
+                <div class="color-picker" id="color-picker">
+                    <button class="color-swatch active" data-color="blue" style="background: #3B5BDB"></button>
+                    <button class="color-swatch" data-color="violet" style="background: #7048E8"></button>
+                    <button class="color-swatch" data-color="turquoise" style="background: #0CA678"></button>
+                    <button class="color-swatch" data-color="orange" style="background: #F76707"></button>
+                    <button class="color-swatch" data-color="pink" style="background: #D6336C"></button>
+                    <button class="color-swatch" data-color="cyan" style="background: #1098AD"></button>
+                </div>
+                <button class="icon-btn" id="theme-toggle" title="Cambiar tema"></button>
+            </div>
+        </header>
+
+        <main class="config-layout">
+            <div class="panel">
+                <h2>Configurar Evaluación</h2>
+                <p class="subtitle">Define los parámetros antes de proyectar a los estudiantes.</p>
+
+                <div class="form-group">
+                    <label>Título de la Evaluación</label>
+                    <input type="text" id="input-title" value="Evaluación de Matemáticas">
                 </div>
 
-                <!-- Timer Mode Selection -->
-                <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
-                    <label class="block text-sm font-semibold text-slate-700 mb-3">Modo de Tiempo</label>
-                    <div class="flex flex-col sm:flex-row gap-4 mb-4">
-                        <label class="flex items-center gap-2 cursor-pointer">
-                            <input type="radio" name="time-mode" value="duration" class="w-4 h-4 text-blue-600" checked onchange="toggleTimeMode()">
-                            <span>Duración (minutos)</span>
-                        </label>
-                        <label class="flex items-center gap-2 cursor-pointer">
-                            <input type="radio" name="time-mode" value="endtime" class="w-4 h-4 text-blue-600" onchange="toggleTimeMode()">
-                            <span>Hora de Término (HH:MM)</span>
-                        </label>
+                <div class="form-group">
+                    <label>Modo de Tiempo</label>
+                    <div class="segmented-control">
+                        <button class="segment-btn active" data-mode="duration">Duración (Minutos)</button>
+                        <button class="segment-btn" data-mode="endtime">Hora de Término</button>
                     </div>
 
-                    <!-- Input for Duration -->
-                    <div id="duration-input-group">
-                        <label for="duration-mins" class="block text-sm text-slate-600 mb-1">Minutos de duración</label>
-                        <input type="number" id="duration-mins" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Ej: 90" min="1" value="90">
-                    </div>
-
-                    <!-- Input for End Time (Hidden by default) -->
-                    <div id="endtime-input-group" class="hidden">
-                        <label for="end-time-val" class="block text-sm text-slate-600 mb-1">Hora exacta de término</label>
-                        <input type="time" id="end-time-val" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                    <div id="mode-duration-wrap">
+                        <input type="number" id="input-duration" value="60" min="1" placeholder="Ej: 90">
+                        <div class="chips">
+                            <button class="chip" onclick="document.getElementById('input-duration').value=30; updatePreview()">30 min</button>
+                            <button class="chip" onclick="document.getElementById('input-duration').value=45; updatePreview()">45 min</button>
+                            <button class="chip" onclick="document.getElementById('input-duration').value=60; updatePreview()">60 min</button>
+                            <button class="chip" onclick="document.getElementById('input-duration').value=90; updatePreview()">90 min</button>
+                        </div>
                     </div>
                     
-                    <p id="time-error" class="text-red-500 text-sm mt-2 hidden">La hora de término debe ser mayor a la hora actual.</p>
+                    <div id="mode-endtime-wrap" class="hidden">
+                        <input type="time" id="input-endtime">
+                        <!-- Indicador de hora local para prevenir desfases -->
+                        <div id="local-time-helper" class="text-muted" style="margin-top: 0.5rem; font-size: 0.85rem;">
+                            Hora interna del computador: cargando...
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Instructions -->
-                <div>
-                    <label for="exam-instructions" class="block text-sm font-semibold text-slate-700 mb-1">Instrucciones (una por línea)</label>
-                    <textarea id="exam-instructions" rows="4" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-none">1. Mantén silencio durante la evaluación.
-2. Si tienes dudas, levanta la mano y el profesor acudirá a tu puesto.
-3. Todas las preguntas deben incluir su desarrollo paso a paso; de lo contrario, la respuesta no será considerada válida.</textarea>
-                    <p class="text-xs text-slate-500 mt-1">Cada salto de línea será un punto en la lista.</p>
+                <div class="form-group">
+                    <label>Instrucciones Generales (Un punto por línea)</label>
+                    <textarea id="input-instructions">Mantener absoluto silencio durante la prueba.
+Si tienes dudas, levanta la mano para llamar al profesor.
+Todas las preguntas deben ir con su desarrollo o no será válida la respuesta.
+Revisa bien antes de entregar.</textarea>
                 </div>
 
-                <!-- Start Button -->
-                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-xl transition duration-200 shadow-lg flex justify-center items-center gap-2 text-lg">
-                    <span>▶ Iniciar Proyección</span>
+                <button class="btn-primary" id="btn-start">
+                    <svg width="24" height="24" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                    Iniciar Proyección
                 </button>
-            </form>
-        </div>
+            </div>
+
+            <div class="preview-wrapper">
+                <div class="preview-header">Vista Previa en Vivo</div>
+                <div class="preview-content" id="preview-container"></div>
+            </div>
+        </main>
     </div>
 
-    <!-- ================= DISPLAY VIEW (PROJECTOR) ================= -->
-    <div id="display-view" class="h-full w-full flex flex-col hidden relative">
-        
-        <!-- Top Bar: Title -->
-        <div class="px-8 py-6 bg-slate-900 border-b border-slate-700 shadow-md flex justify-between items-center z-10">
-            <h1 id="display-title" class="text-4xl md:text-5xl font-bold tracking-tight text-white shadow-sm">Evaluación</h1>
-            
-            <!-- Subtle Reset Button -->
-            <button onclick="resetExam()" class="text-slate-500 hover:text-white transition px-3 py-1 rounded border border-slate-700 hover:border-slate-500 text-sm" title="Finalizar o configurar de nuevo">
-                Terminar
-            </button>
-        </div>
+    <div id="projection-view" class="hidden">
+        <header class="proj-header">
+            <div class="proj-title" id="proj-title-disp">Evaluación de Matemáticas</div>
+            <div class="flex items-center gap-4">
+                <div class="proj-clock" id="proj-real-clock">--:--</div>
+                <button class="icon-btn" id="proj-fullscreen" title="Pantalla Completa (F)">
+                    <svg width="20" height="20" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+                </button>
+                <button class="btn-secondary" id="btn-end">
+                    <svg width="18" height="18" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/></svg>
+                    Terminar
+                </button>
+            </div>
+        </header>
 
-        <!-- Main Content Area -->
-        <div class="flex-grow flex flex-col lg:flex-row overflow-hidden">
-            
-            <!-- Timer Area -->
-            <div class="flex-grow flex flex-col items-center justify-center p-8 border-b lg:border-b-0 lg:border-r border-slate-800 relative bg-slate-900 shadow-inner">
-                <div class="text-slate-400 text-xl md:text-2xl mb-4 font-semibold uppercase tracking-widest text-center" id="timer-label">Tiempo Restante</div>
-                
-                <!-- The Huge Timer -->
-                <div id="countdown-timer" class="timer-font text-[6rem] sm:text-[8rem] md:text-[12rem] lg:text-[15rem] leading-none font-bold text-white transition-colors duration-500 text-center drop-shadow-2xl">
-                    00:00
-                </div>
-                
-                <div id="time-up-msg" class="hidden text-5xl md:text-7xl font-bold text-red-500 mt-8 animate-pulse text-center drop-shadow-lg">
-                    ¡TIEMPO TERMINADO!
+        <main class="proj-main">
+            <div class="timer-container" id="timer-wrapper">
+                <svg class="timer-svg" viewBox="0 0 100 100">
+                    <circle class="timer-track" cx="50" cy="50" r="45"></circle>
+                    <circle class="timer-progress" id="timer-ring" cx="50" cy="50" r="45"></circle>
+                </svg>
+                <div class="timer-text-container">
+                    <div class="timer-time" id="timer-text">60:00</div>
+                    <div class="timer-message" id="timer-msg">¡Mucho éxito!</div>
                 </div>
             </div>
 
-            <!-- Instructions Area -->
-            <div class="w-full lg:w-1/3 min-w-[350px] p-8 lg:p-12 bg-slate-800 flex flex-col overflow-y-auto">
-                <div class="flex items-center gap-3 mb-6 border-b border-slate-600 pb-4">
-                    <span class="text-3xl">📋</span>
-                    <h2 class="text-3xl font-bold text-blue-300">Instrucciones</h2>
-                </div>
-                <div id="display-instructions" class="text-slate-200 text-xl md:text-2xl leading-relaxed space-y-4">
-                    <!-- Instructions injected here -->
-                </div>
-                
-                <!-- Little encouragement at the bottom -->
-                <div class="mt-auto pt-12 text-center">
-                    <p class="text-2xl font-bold text-slate-500 opacity-50">¡Mucho éxito!</p>
-                </div>
+            <div class="proj-instructions">
+                <h3>
+                    <svg width="28" height="28" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                    Instrucciones
+                </h3>
+                <ul class="instruction-list" id="proj-instructions-list"></ul>
             </div>
-        </div>
+        </main>
 
-        <!-- Progress Bar (Bottom) -->
-        <div class="h-4 w-full bg-slate-900 relative">
-            <div id="progress-bar" class="h-full bg-blue-500 w-full rounded-r-sm"></div>
+        <div class="screen-end" id="screen-end">
+            <h1>¡TIEMPO FINALIZADO!</h1>
+            <p>Por favor, suelten los lápices y entreguen su evaluación.</p>
+            <button class="btn-secondary" style="margin-top: 2rem;" onclick="endProjectionConfirm()">Volver al menú</button>
         </div>
     </div>
 
-    <!-- ================= JAVASCRIPT ================= -->
+    <div id="confirm-modal">
+        <div class="modal-content">
+            <h3>¿Terminar evaluación?</h3>
+            <p>El cronómetro se detendrá y volverás a la pantalla de configuración.</p>
+            <div class="modal-actions">
+                <button class="btn-secondary" onclick="closeConfirmModal()">Cancelar</button>
+                <button class="btn-danger" onclick="endProjectionConfirm()">Sí, terminar</button>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // State variables
-        let timerInterval = null;
-        let endTimeMs = 0;
-        let totalDurationMs = 0;
+        const iconSun = `<svg width="20" height="20" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`;
+        const iconMoon = `<svg width="20" height="20" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`;
 
-        // UI Elements
+        const html = document.documentElement;
+        const themeToggle = document.getElementById('theme-toggle');
+        const colorSwatches = document.querySelectorAll('.color-swatch');
         const configView = document.getElementById('config-view');
-        const displayView = document.getElementById('display-view');
-        const configForm = document.getElementById('config-form');
+        const projectionView = document.getElementById('projection-view');
+        const previewContainer = document.getElementById('preview-container');
+        const btnStart = document.getElementById('btn-start');
         
-        // Display Elements
-        const displayTitle = document.getElementById('display-title');
-        const countdownTimer = document.getElementById('countdown-timer');
-        const displayInstructions = document.getElementById('display-instructions');
-        const progressBar = document.getElementById('progress-bar');
-        const timeUpMsg = document.getElementById('time-up-msg');
-        const timerLabel = document.getElementById('timer-label');
-        const errorMsg = document.getElementById('time-error');
+        const inTitle = document.getElementById('input-title');
+        const inDuration = document.getElementById('input-duration');
+        const inEndtime = document.getElementById('input-endtime');
+        const inInstructions = document.getElementById('input-instructions');
+        const segmentBtns = document.querySelectorAll('.segment-btn');
+        
+        const dispTitle = document.getElementById('proj-title-disp');
+        const dispRealClock = document.getElementById('proj-real-clock');
+        const dispTimerText = document.getElementById('timer-text');
+        const dispTimerMsg = document.getElementById('timer-msg');
+        const dispTimerRing = document.getElementById('timer-ring');
+        const dispInstList = document.getElementById('proj-instructions-list');
+        const timerWrapper = document.getElementById('timer-wrapper');
+        const screenEnd = document.getElementById('screen-end');
+        const confirmModal = document.getElementById('confirm-modal');
+        const helperText = document.getElementById('local-time-helper');
 
-        // Toggle input fields based on Radio selection
-        function toggleTimeMode() {
-            const mode = document.querySelector('input[name="time-mode"]:checked').value;
-            if (mode === 'duration') {
-                document.getElementById('duration-input-group').classList.remove('hidden');
-                document.getElementById('endtime-input-group').classList.add('hidden');
-            } else {
-                document.getElementById('duration-input-group').classList.add('hidden');
-                document.getElementById('endtime-input-group').classList.remove('hidden');
-            }
-            errorMsg.classList.add('hidden');
+        let timeMode = 'duration'; 
+        let timerInterval = null;
+        let realClockInterval = null;
+        let totalSeconds = 0;
+        let targetTime = 0;
+        const CIRCUMFERENCE = 283; 
+
+        // Tema y colores
+        function initTheme() {
+            const savedTheme = localStorage.getItem('evalTheme') || 'dark';
+            const savedAccent = localStorage.getItem('evalAccent') || 'blue';
+            html.setAttribute('data-theme', savedTheme);
+            html.setAttribute('data-accent', savedAccent);
+            updateThemeIcon();
+            colorSwatches.forEach(s => s.classList.toggle('active', s.dataset.color === savedAccent));
+        }
+        
+        function updateThemeIcon() {
+            themeToggle.innerHTML = html.getAttribute('data-theme') === 'dark' ? iconSun : iconMoon;
         }
 
-        // Form Submit Handler
-        configForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            errorMsg.classList.add('hidden');
-
-            const title = document.getElementById('exam-title').value;
-            const mode = document.querySelector('input[name="time-mode"]:checked').value;
-            const instructionsText = document.getElementById('exam-instructions').value;
-
-            // Calculate End Time
-            let now = new Date();
-            
-            if (mode === 'duration') {
-                const mins = parseInt(document.getElementById('duration-mins').value);
-                if (isNaN(mins) || mins <= 0) return;
-                totalDurationMs = mins * 60 * 1000;
-                endTimeMs = now.getTime() + totalDurationMs;
-            } else {
-                const endVal = document.getElementById('end-time-val').value;
-                if (!endVal) return;
-                
-                const [hours, minutes] = endVal.split(':');
-                let endDate = new Date(now);
-                endDate.setHours(parseInt(hours), parseInt(minutes), 0, 0);
-                
-                // If time has already passed today, show error
-                if (endDate.getTime() <= now.getTime()) {
-                    errorMsg.classList.remove('hidden');
-                    return;
-                }
-                
-                endTimeMs = endDate.getTime();
-                totalDurationMs = endTimeMs - now.getTime();
-            }
-
-            // Setup Display Data
-            displayTitle.textContent = title;
-            
-            // Format instructions into a nice HTML list
-            const instructionsLines = instructionsText.split('\n').filter(line => line.trim() !== '');
-            displayInstructions.innerHTML = '';
-            
-            if(instructionsLines.length > 0) {
-                const ul = document.createElement('ul');
-                ul.className = 'instruction-list space-y-4';
-                instructionsLines.forEach(line => {
-                    // Remove leading numbers if user typed them (e.g. "1. ") so CSS can handle it cleanly
-                    let cleanLine = line.replace(/^\d+[\.\-]?\s*/, '');
-                    const li = document.createElement('li');
-                    li.textContent = cleanLine;
-                    ul.appendChild(li);
-                });
-                displayInstructions.appendChild(ul);
-            } else {
-                displayInstructions.innerHTML = '<p class="text-slate-500 italic">No hay instrucciones adicionales.</p>';
-            }
-
-            // Reset UI states
-            countdownTimer.classList.remove('hidden', 'text-yellow-400', 'text-red-500');
-            countdownTimer.classList.add('text-white');
-            timeUpMsg.classList.add('hidden');
-            timerLabel.classList.remove('hidden');
-            
-            // Switch Views
-            configView.classList.add('hidden');
-            displayView.classList.remove('hidden');
-
-            // Start Timer
-            startTimer();
+        themeToggle.addEventListener('click', () => {
+            const newTheme = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('evalTheme', newTheme);
+            updateThemeIcon();
+            updatePreview();
         });
 
-        function startTimer() {
-            // Clear any existing interval
-            if (timerInterval) clearInterval(timerInterval);
-            
-            // Initial call
-            updateTimerDisplay();
-            
-            // Set interval
-            timerInterval = setInterval(updateTimerDisplay, 1000);
-        }
+        colorSwatches.forEach(swatch => {
+            swatch.addEventListener('click', (e) => {
+                const color = e.target.dataset.color;
+                html.setAttribute('data-accent', color);
+                localStorage.setItem('evalAccent', color);
+                colorSwatches.forEach(s => s.classList.remove('active'));
+                e.target.classList.add('active');
+                updatePreview();
+            });
+        });
 
-        function updateTimerDisplay() {
-            const now = new Date().getTime();
-            const remainingMs = endTimeMs - now;
-
-            if (remainingMs <= 0) {
-                // Time is up!
-                clearInterval(timerInterval);
-                countdownTimer.textContent = "00:00";
-                progressBar.style.width = "0%";
-                progressBar.classList.remove('bg-blue-500', 'bg-yellow-400');
-                progressBar.classList.add('bg-red-600');
+        // Tabs
+        segmentBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const targetBtn = e.currentTarget; // Blindaje contra clicks en hijos
+                segmentBtns.forEach(b => b.classList.remove('active'));
+                targetBtn.classList.add('active');
+                timeMode = targetBtn.dataset.mode;
                 
-                // Visual alerts
-                countdownTimer.classList.add('hidden');
-                timerLabel.classList.add('hidden');
-                timeUpMsg.classList.remove('hidden');
-                return;
-            }
+                if (timeMode === 'duration') {
+                    document.getElementById('mode-duration-wrap').classList.remove('hidden');
+                    document.getElementById('mode-endtime-wrap').classList.add('hidden');
+                } else {
+                    document.getElementById('mode-duration-wrap').classList.add('hidden');
+                    document.getElementById('mode-endtime-wrap').classList.remove('hidden');
+                    const now = new Date();
+                    now.setHours(now.getHours() + 1);
+                    inEndtime.value = now.toTimeString().slice(0,5);
+                }
+                updatePreview();
+            });
+        });
 
-            // Calculate hours, mins, secs
-            const h = Math.floor(remainingMs / (1000 * 60 * 60));
-            const m = Math.floor((remainingMs % (1000 * 60 * 60)) / (1000 * 60));
-            const s = Math.floor((remainingMs % (1000 * 60)) / 1000);
+        // Reloj del helper
+        setInterval(() => {
+            const d = new Date();
+            helperText.textContent = `Hora interna del equipo: ${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;
+        }, 1000);
 
-            // Format string
-            let timeString = "";
-            if (h > 0) {
-                timeString += h.toString().padStart(2, '0') + ":";
-            }
-            timeString += m.toString().padStart(2, '0') + ":" + s.toString().padStart(2, '0');
-            countdownTimer.textContent = timeString;
+        // Vista previa
+        function buildInstructionsHTML(text) {
+            return text.split('\n').filter(line => line.trim() !== '').map((line, idx) => `
+                <li class="instruction-item">
+                    <span class="instruction-number">${idx + 1}</span>
+                    <span>${line}</span>
+                </li>
+            `).join('');
+        }
 
-            // Update Progress Bar
-            const percentRemaining = (remainingMs / totalDurationMs) * 100;
-            progressBar.style.width = `${Math.max(0, percentRemaining)}%`;
-
-            // Color Warnings
-            const remainingMinsTotal = remainingMs / (1000 * 60);
-            
-            // Reset colors first
-            countdownTimer.classList.remove('text-white', 'text-yellow-400', 'text-red-500');
-            progressBar.classList.remove('bg-blue-500', 'bg-yellow-400', 'bg-red-500');
-
-            if (remainingMinsTotal <= 1) {
-                // Danger (Red) - 1 minute or less
-                countdownTimer.classList.add('text-red-500');
-                progressBar.classList.add('bg-red-500');
-            } else if (remainingMinsTotal <= 5) {
-                // Warning (Yellow) - 5 minutes or less
-                countdownTimer.classList.add('text-yellow-400');
-                progressBar.classList.add('bg-yellow-400');
+        function getFormatTimePreview() {
+            if (timeMode === 'duration') {
+                const mins = parseInt(inDuration.value) || 0;
+                if (mins >= 60) return `${Math.floor(mins/60).toString().padStart(2,'0')}:${(mins%60).toString().padStart(2,'0')}:00`;
+                return `${mins.toString().padStart(2,'0')}:00`;
             } else {
-                // Normal (White/Blue)
-                countdownTimer.classList.add('text-white');
-                progressBar.classList.add('bg-blue-500');
+                return inEndtime.value || "00:00";
             }
         }
 
-        // Return to configuration
-        function resetExam() {
-            if (timerInterval) {
-                clearInterval(timerInterval);
-            }
-            displayView.classList.add('hidden');
-            configView.classList.remove('hidden');
+        function updatePreview() {
+            dispTitle.textContent = inTitle.value || 'Evaluación';
+            dispInstList.innerHTML = buildInstructionsHTML(inInstructions.value);
+            dispTimerText.textContent = getFormatTimePreview();
             
-            // Reset progress bar visually
-            progressBar.style.width = "100%";
-            progressBar.classList.remove('bg-yellow-400', 'bg-red-500', 'bg-red-600');
-            progressBar.classList.add('bg-blue-500');
+            previewContainer.innerHTML = '';
+            const clone = projectionView.cloneNode(true);
+            clone.classList.remove('hidden');
+            clone.style.position = 'relative';
+            clone.style.height = '100%';
+            clone.querySelector('.proj-header').style.padding = '1rem';
+            clone.querySelector('.proj-main').style.padding = '1rem';
+            previewContainer.appendChild(clone);
         }
 
-        // Initialize setup
-        toggleTimeMode(); // Ensure correct input is showing on load
+        [inTitle, inDuration, inEndtime, inInstructions].forEach(input => {
+            input.addEventListener('input', updatePreview);
+        });
 
+        // Lógica Principal
+        btnStart.addEventListener('click', startProjection);
+        document.getElementById('btn-end').addEventListener('click', () => confirmModal.classList.add('active'));
+        document.getElementById('proj-fullscreen').addEventListener('click', toggleFullScreen);
+
+        function startProjection() {
+            configView.classList.add('hidden');
+            projectionView.classList.remove('hidden');
+            screenEnd.classList.remove('active');
+            timerWrapper.className = 'timer-container';
+            
+            updatePreview();
+            
+            // Cálculo robusto de segundos
+            if (timeMode === 'duration') {
+                totalSeconds = (parseInt(inDuration.value) || 60) * 60;
+            } else {
+                const now = new Date();
+                const timeStr = inEndtime.value;
+                if (!timeStr) {
+                    totalSeconds = 60 * 60;
+                } else {
+                    const [h, m] = timeStr.split(':').map(Number);
+                    const target = new Date(now.getTime());
+                    target.setHours(h, m, 0, 0);
+                    
+                    if (target <= now) {
+                        target.setDate(target.getDate() + 1);
+                    }
+                    totalSeconds = Math.floor((target.getTime() - now.getTime()) / 1000);
+                }
+            }
+            
+            targetTime = Date.now() + (totalSeconds * 1000);
+            startClocks();
+        }
+
+        function startClocks() {
+            updateClocks();
+            timerInterval = setInterval(updateClocks, 200);
+            realClockInterval = setInterval(updateRealClock, 10000);
+            updateRealClock();
+        }
+
+        function updateRealClock() {
+            const now = new Date();
+            dispRealClock.textContent = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', hour12: false});
+        }
+
+        function formatTimeLeft(seconds) {
+            if (seconds <= 0) return "00:00";
+            const h = Math.floor(seconds / 3600);
+            const m = Math.floor((seconds % 3600) / 60);
+            const s = Math.floor(seconds % 60);
+            
+            if (h > 0) return `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+            return `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+        }
+
+        function updateClocks() {
+            const now = Date.now();
+            let remaining = Math.max(0, Math.floor((targetTime - now) / 1000));
+            
+            dispTimerText.textContent = formatTimeLeft(remaining);
+            
+            // Reducción dinámica de fuente si hay horas (previene choque con círculo)
+            if (remaining >= 3600) {
+                dispTimerText.style.fontSize = 'clamp(2.5rem, 7.5vw, 5.2rem)';
+            } else {
+                dispTimerText.style.fontSize = 'clamp(3rem, 9vw, 6.5rem)';
+            }
+            
+            const fraction = remaining / totalSeconds;
+            const offset = CIRCUMFERENCE - (fraction * CIRCUMFERENCE);
+            dispTimerRing.style.strokeDashoffset = isNaN(offset) ? 0 : offset;
+
+            timerWrapper.className = 'timer-container';
+            if (remaining <= 0) {
+                clearInterval(timerInterval);
+                screenEnd.classList.add('active');
+            } else if (remaining <= 60) {
+                timerWrapper.classList.add('state-danger', 'pulse');
+                dispTimerMsg.textContent = "¡Último minuto!";
+            } else if (remaining <= 300) {
+                timerWrapper.classList.add('state-orange');
+                dispTimerMsg.textContent = "Revisa tus respuestas";
+            } else if (remaining <= 600) {
+                timerWrapper.classList.add('state-warning');
+                dispTimerMsg.textContent = "Quedan 10 minutos";
+            } else {
+                dispTimerMsg.textContent = "¡Mucho éxito!";
+            }
+        }
+
+        function closeConfirmModal() { confirmModal.classList.remove('active'); }
+        function endProjectionConfirm() {
+            closeConfirmModal();
+            clearInterval(timerInterval);
+            clearInterval(realClockInterval);
+            if (document.fullscreenElement) document.exitFullscreen();
+            projectionView.classList.add('hidden');
+            configView.classList.remove('hidden');
+        }
+
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(() => {});
+            } else {
+                if (document.exitFullscreen) document.exitFullscreen();
+            }
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key.toLowerCase() === 'f' && !projectionView.classList.contains('hidden') && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+                toggleFullScreen();
+            }
+        });
+
+        initTheme();
+        updatePreview();
     </script>
 </body>
 </html>
